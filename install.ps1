@@ -42,6 +42,17 @@ function WaitForSalt {
     Start-Sleep -s 15
 }
 
+function EnsureAdmin {
+    $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
+    if (!$currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+        echo 'must be run as an admin'
+        exit 0
+    }
+}
+
+# ensure we're running as an admin
+EnsureAdmin
+
 # set execution polity
 Set-ExecutionPolicy Bypass -Scope CurrentUser
 
