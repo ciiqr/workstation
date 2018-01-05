@@ -31,6 +31,20 @@ function TryRemoveDirectory($dir) {
     }
 }
 
+function WaitForSalt {
+    # source: https://gist.github.com/deuscapturus/8f18d28d1a1ccef6327c
+    $saltCallExe = "$saltCall.exe"
+    $saltCallBat = "$saltCall.bat"
+    while (!(Test-Path $saltCallExe) -and !(Test-Path $saltCallBat)) {
+        echo 'Waiting for salt-call to appear'
+        Start-Sleep 5 
+    }
+    Start-Sleep -s 15
+}
+
+# set execution polity
+Set-ExecutionPolicy Bypass -Scope CurrentUser
+
 # create temp directory
 echo 'Creating temp directory...'
 $tmp = CustomTempDirectory
@@ -44,8 +58,7 @@ $repoSubDir = Join-Path $repoTempDir $repoZipSubDir
 
 # download workstation
 echo 'Downloading workstation...'
-$down = New-Object System.Net.WebClient
-$down.DownloadFile($repoUrl, $repoTempFile)
+Invoke-WebRequest $repoUrl -OutFile $repoTempFile
 
 # unzip workstation
 TryRemoveDirectory $repoTempDir
@@ -58,15 +71,15 @@ Move-Item $repoSubDir $workstation
 
 # download salt
 echo 'Downloading salt...'
-$down = New-Object System.Net.WebClient
-$down.DownloadFile($saltUrl, $saltFile)
+Invoke-WebRequest $saltUrl -OutFile $saltFile
 
 # install salt
-Set-ExecutionPolicy Bypass -Scope Process -Force
 & $saltFile /S /minion-name=workstation /start-minion=0
 
+# wait for salt to be ready
+WaitForSalt
 
-# TODO: run salt highstate
+# run salt highstate
 & $saltCall --local state.apply
 
 echo 'done'
