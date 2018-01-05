@@ -20,7 +20,7 @@ function CustomTempDirectory {
     $parent = [System.IO.Path]::GetTempPath()
     $tmp = Join-Path $parent 'workstation'
     if (![System.IO.Directory]::Exists($tmp)) {
-        [System.IO.Directory]::CreateDirectory($tmp)
+        [System.IO.Directory]::CreateDirectory($tmp) > $null
     }
     return $tmp
 }
@@ -31,13 +31,21 @@ function TryRemoveDirectory($dir) {
     }
 }
 
+function WaitForFile($file) {
+    while (!(Test-Path $file)) {
+        echo "Waiting for $file to appear"
+        Start-Sleep 5
+    }
+    Start-Sleep 5
+}
+
 function WaitForSalt {
     # source: https://gist.github.com/deuscapturus/8f18d28d1a1ccef6327c
     $saltCallExe = "$saltCall.exe"
     $saltCallBat = "$saltCall.bat"
     while (!(Test-Path $saltCallExe) -and !(Test-Path $saltCallBat)) {
         echo 'Waiting for salt-call to appear'
-        Start-Sleep 5 
+        Start-Sleep 5
     }
     Start-Sleep -s 15
 }
@@ -88,6 +96,7 @@ Invoke-WebRequest $saltUrl -OutFile $saltFile
 & $saltFile /S /minion-name=workstation /start-minion=0
 
 # set salt perms
+WaitForFile($saltDir)
 icacls $saltDir /grant "Everyone:(OI)(CI)F"
 
 # wait for salt to be ready
