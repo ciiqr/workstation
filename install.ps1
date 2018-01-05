@@ -87,6 +87,9 @@ Invoke-WebRequest $saltUrl -OutFile $saltFile
 # install salt
 & $saltFile /S /minion-name=workstation /start-minion=0
 
+# set salt perms
+icacls $saltDir /grant "Everyone:(OI)(CI)F"
+
 # wait for salt to be ready
 WaitForSalt
 
