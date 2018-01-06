@@ -7,7 +7,8 @@ $repoFilename = 'repo.zip'
 
 $repoZipSubDir = 'workstation-master'
 $workstation = Join-Path $env:SystemDrive 'workstation'
-$install = Join-Path $workstation 'install.ps1'
+$scripts = Join-Path $workstation 'scripts'
+$install = Join-Path $scripts 'install.ps1'
 
 $saltDir = Join-Path $env:SystemDrive 'salt'
 $saltCall = Join-Path $saltDir 'salt-call'
