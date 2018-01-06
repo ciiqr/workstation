@@ -8,7 +8,8 @@ $repoFilename = 'repo.zip'
 $repoZipSubDir = 'workstation-master'
 $workstation = Join-Path $env:SystemDrive 'workstation'
 $scripts = Join-Path $workstation 'scripts'
-$install = Join-Path $scripts 'install.ps1'
+$setup_salt = Join-Path $scripts 'setup-salt.ps1'
+$provision = Join-Path $scripts 'provision.ps1'
 
 $saltDir = Join-Path $env:SystemDrive 'salt'
 $saltCall = Join-Path $saltDir 'salt-call'
@@ -30,10 +31,6 @@ function TryRemoveDirectory($dir) {
     if ([System.IO.Directory]::Exists($dir)) {
         Remove-Item $dir -Force -Recurse
     }
-}
-
-function CreateSymlink($target, $link) {
-    New-Item -Path $link -ItemType SymbolicLink -Value $target -Force
 }
 
 function WaitForFile($file) {
@@ -82,7 +79,7 @@ $repoSubDir = Join-Path $repoTempDir $repoZipSubDir
 
 # download workstation
 echo 'Downloading workstation...'
-Invoke-WebRequest $repoUrl -OutFile $repoTempFile
+Invoke-WebRequest $repoUrl -OutFile $repoTempFile -UseBasicParsing
 
 # unzip workstation
 TryRemoveDirectory $repoTempDir
@@ -93,10 +90,9 @@ TryRemoveDirectory $workstation
 Move-Item $repoSubDir $workstation
 
 
-# TODO: everything after this should be it's own script: setup-salt.ps1, maybe also highstate.ps1/provision.ps1
 # download salt
 echo 'Downloading salt...'
-Invoke-WebRequest $saltUrl -OutFile $saltFile
+Invoke-WebRequest $saltUrl -OutFile $saltFile -UseBasicParsing
 
 # install salt
 # TODO: probably don't need the minion name, or I could create minion_id myself
@@ -111,14 +107,9 @@ WaitForSalt
 
 
 # setup salt
-CreateSymlink "$workstation\salt\etc\grains-windows" "$saltDir\conf\grains"
-CreateSymlink "$workstation\salt\etc\minion.conf" "$saltDir\conf\minion"
-CreateSymlink "$workstation\salt\etc\masterlike.conf" "$saltDir\conf\masterlike.conf"
-CreateSymlink "$workstation\salt\etc\masterless.conf" "$saltDir\conf\minion.d\masterless.conf"
-& $saltCall chocolatey.bootstrap
+& "$setup_salt" -SaltDir $saltDir -WorkstationDir $workstation
 
 # run salt highstate
-& $saltCall saltutil.sync_all
-& $saltCall --retcode-passthrough --state-verbose=False -l warning state.apply
+& "$provision" -SaltDir $saltDir
 
 echo 'done'
