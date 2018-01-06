@@ -92,6 +92,7 @@ TryRemoveDirectory $workstation
 Move-Item $repoSubDir $workstation
 
 
+# TODO: everything after this should be it's own script: setup-salt.ps1, maybe also highstate.ps1/provision.ps1
 # download salt
 echo 'Downloading salt...'
 Invoke-WebRequest $saltUrl -OutFile $saltFile
