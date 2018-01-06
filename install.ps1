@@ -31,6 +31,10 @@ function TryRemoveDirectory($dir) {
     }
 }
 
+function CreateSymlink($target, $link) {
+    New-Item -Path $link -ItemType SymbolicLink -Value $target -Force
+}
+
 function WaitForFile($file) {
     while (!(Test-Path $file)) {
         echo "Waiting for $file to appear"
@@ -93,6 +97,7 @@ echo 'Downloading salt...'
 Invoke-WebRequest $saltUrl -OutFile $saltFile
 
 # install salt
+# TODO: probably don't need the minion name, or I could create minion_id myself
 & $saltFile /S /minion-name=workstation /start-minion=0
 
 # set salt perms
@@ -102,7 +107,16 @@ icacls $saltDir /grant "Everyone:(OI)(CI)F"
 # wait for salt to be ready
 WaitForSalt
 
+
+# setup salt
+CreateSymlink "$workstation\salt\etc\grains-windows" "$saltDir\conf\grains"
+CreateSymlink "$workstation\salt\etc\minion.conf" "$saltDir\conf\minion"
+CreateSymlink "$workstation\salt\etc\masterlike.conf" "$saltDir\conf\masterlike.conf"
+CreateSymlink "$workstation\salt\etc\masterless.conf" "$saltDir\conf\minion.d\masterless.conf"
+& $saltCall chocolatey.bootstrap
+
 # run salt highstate
-& $saltCall --local state.apply
+& $saltCall saltutil.sync_all
+& $saltCall --retcode-passthrough --state-verbose=False -l warning state.apply
 
 echo 'done'
