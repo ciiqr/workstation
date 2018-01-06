@@ -14,7 +14,11 @@ Start-Process powershell -ArgumentList '-NoProfile -NoExit -InputFormat None -Co
 
 * from local (change path to wherever you've clone to)
 ```
-Start-Process powershell -ArgumentList '-NoProfile -NoExit -InputFormat None -File C:\Users\william\Dropbox\workstation\scripts\install.ps1' -verb RunAs; exit
+# open an admin powershell window to wherever you cloned to
+Start-Process powershell -ArgumentList '-NoProfile -NoExit -InputFormat None -command "cd C:\Users\william\Dropbox\workstation"' -verb RunAs; exit
+
+# install linked to cloned path
+& .\scripts\install.ps1 -Link
 ```
 
 ## update (via powershell)

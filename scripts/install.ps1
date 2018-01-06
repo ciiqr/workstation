@@ -1,3 +1,8 @@
+Param (
+    [Alias("SaltDir")] 
+    [string]$salt = $( Join-Path $env:SystemDrive 'salt' ),
+    [switch]$link
+)
 
 # declarations
 $saltUrl = 'https://repo.saltstack.com/windows/Salt-Minion-2017.7.2-Py3-AMD64-Setup.exe'
@@ -15,6 +20,10 @@ $saltDir = Join-Path $env:SystemDrive 'salt'
 $saltCall = Join-Path $saltDir 'salt-call'
 
 # functions
+function CreateSymlink($target, $link) {
+    New-Item -Path $link -ItemType SymbolicLink -Value $target -Force > $null
+}
+
 function CustomTempDirectory {
     # NOTE: I would rather generate a unique directory name and then delete it when done,
     # but windows is stupid with the permissions of the newly downloaded file
@@ -29,7 +38,7 @@ function CustomTempDirectory {
 
 function TryRemoveDirectory($dir) {
     if ([System.IO.Directory]::Exists($dir)) {
-        Remove-Item $dir -Force -Recurse
+        [System.IO.Directory]::Delete($dir, $true)
     }
 }
 
@@ -66,6 +75,7 @@ EnsureAdmin
 # set execution polity
 Set-ExecutionPolicy Bypass -Scope CurrentUser
 
+
 # create temp directory
 echo 'Creating temp directory...'
 $tmp = CustomTempDirectory
@@ -77,17 +87,24 @@ $repoTempDir = Join-Path $tmp 'workstation'
 $repoSubDir = Join-Path $repoTempDir $repoZipSubDir
 
 
-# download workstation
-echo 'Downloading workstation...'
-Invoke-WebRequest $repoUrl -OutFile $repoTempFile -UseBasicParsing
+if ($link) {
+    # link
+    TryRemoveDirectory $workstation
+    CreateSymlink "$PSScriptRoot\.." $workstation
+}
+else {
+    # download workstation
+    echo 'Downloading workstation...'
+    Invoke-WebRequest $repoUrl -OutFile $repoTempFile -UseBasicParsing
 
-# unzip workstation
-TryRemoveDirectory $repoTempDir
-Expand-Archive $repoTempFile -DestinationPath $repoTempDir
+    # unzip workstation
+    TryRemoveDirectory $repoTempDir
+    Expand-Archive $repoTempFile -DestinationPath $repoTempDir
 
-# move to system drive
-TryRemoveDirectory $workstation
-Move-Item $repoSubDir $workstation
+    # move to system drive
+    TryRemoveDirectory $workstation
+    Move-Item $repoSubDir $workstation
+}
 
 
 # download salt
@@ -107,9 +124,11 @@ WaitForSalt
 
 
 # setup salt
+echo 'Setting up salt...'
 & "$setup_salt" -SaltDir $saltDir -WorkstationDir $workstation
 
 # run salt highstate
+echo 'Provisioning...'
 & "$provision" -SaltDir $saltDir
 
 echo 'done'
