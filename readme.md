@@ -5,7 +5,7 @@ see [ciiqr/machines](https://github.com/ciiqr/machines) for my linux setup
 ## compatibility
 * uses several PowerShell 5 features
 
-## install with powershell
+## install (via powershell)
 
 * from repo
 ```
@@ -17,3 +17,7 @@ Start-Process powershell -ArgumentList '-NoProfile -NoExit -InputFormat None -Co
 Start-Process powershell -ArgumentList '-NoProfile -NoExit -InputFormat None -File C:\Users\william\Dropbox\workstation\scripts\install.ps1' -verb RunAs; exit
 ```
 
+## update (via powershell)
+```
+Start-Process powershell -ArgumentList '-NoProfile -NoExit -InputFormat None -File C:\workstation\scripts\provision.ps1' -verb RunAs; exit
+```
