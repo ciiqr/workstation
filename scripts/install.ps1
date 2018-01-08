@@ -54,6 +54,8 @@ function WaitForSalt {
     # source: https://gist.github.com/deuscapturus/8f18d28d1a1ccef6327c
     $saltCallExe = "$saltCall.exe"
     $saltCallBat = "$saltCall.bat"
+    # TODO: this OR something to check last change of salt dir instead of all this and wait at least 10 seconds for new changes or maybe we can even check for the program doing these things...
+    # 'C:\salt\bin\Scripts\salt-call':
     while (!(Test-Path $saltCallExe) -and !(Test-Path $saltCallBat)) {
         echo 'Waiting for salt-call to appear'
         Start-Sleep 5

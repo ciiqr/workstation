@@ -6,6 +6,7 @@ javaruntime: chocolatey.installed
 dotnet4.7.1: chocolatey.installed
 adobeshockwaveplayer: chocolatey.installed
 k-litecodecpackmega: chocolatey.installed
+vcredist-all: chocolatey.installed
 
 # programs
 firefox: chocolatey.installed
