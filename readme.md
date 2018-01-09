@@ -4,6 +4,7 @@ see [ciiqr/machines](https://github.com/ciiqr/machines) for my linux setup
 
 ## compatibility
 * uses several PowerShell 5 features
+* this installs the most recent release of salt (nitrogen/2017.7.2), however the reg module is broken in this version, so you must compile the next release (oxygen/2018.2.0) of salt yourself: [building-and-developing-on-windows](https://docs.saltstack.com/en/latest/topics/installation/windows.html#building-and-developing-on-windows)
 
 ## install (via powershell)
 
