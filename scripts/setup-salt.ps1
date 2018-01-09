@@ -19,5 +19,5 @@ CreateSymlink "$workstation\salt\etc\minion.conf" "$salt\conf\minion"
 CreateSymlink "$workstation\salt\etc\masterlike.conf" "$salt\conf\masterlike.conf"
 CreateSymlink "$workstation\salt\etc\masterless.conf" "$salt\conf\minion.d\masterless.conf"
 
-# install chocolatey (TODO: could be a state)
-& $saltCall chocolatey.bootstrap
+# apply bootstrap state (for installing package managers and such)
+& $saltCall state.apply bootstrap
