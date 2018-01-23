@@ -108,6 +108,7 @@ else {
 }
 
 
+# TODO: support building ourself (since I'm already doing this manually) https://docs.saltstack.com/en/latest/topics/installation/windows.html#building-and-developing-on-windows
 # download salt
 echo 'Downloading salt...'
 Invoke-WebRequest $saltUrl -OutFile $saltFile -UseBasicParsing
