@@ -16,8 +16,7 @@ $scripts = Join-Path $workstation 'scripts'
 $setup_salt = Join-Path $scripts 'setup-salt.ps1'
 $provision = Join-Path $scripts 'provision.ps1'
 
-$saltDir = Join-Path $env:SystemDrive 'salt'
-$saltCall = Join-Path $saltDir 'salt-call'
+$saltCall = Join-Path $salt 'salt-call'
 
 # functions
 function CreateSymlink($target, $link) {
@@ -55,7 +54,7 @@ function WaitForSalt {
     $saltCallExe = "$saltCall.exe"
     $saltCallBat = "$saltCall.bat"
     # TODO: this OR something to check last change of salt dir instead of all this and wait at least 10 seconds for new changes or maybe we can even check for the program doing these things...
-    # 'C:\salt\bin\Scripts\salt-call':
+    # '/salt/bin/Scripts/salt-call':
     while (!(Test-Path $saltCallExe) -and !(Test-Path $saltCallBat)) {
         echo 'Waiting for salt-call to appear'
         Start-Sleep 5
@@ -118,8 +117,8 @@ Invoke-WebRequest $saltUrl -OutFile $saltFile -UseBasicParsing
 & $saltFile /S /minion-name=workstation /start-minion=0
 
 # set salt perms
-WaitForFile($saltDir)
-icacls $saltDir /grant "Everyone:(OI)(CI)F"
+WaitForFile($salt)
+icacls $salt /grant "Everyone:(OI)(CI)F"
 
 # wait for salt to be ready
 WaitForSalt
@@ -127,10 +126,10 @@ WaitForSalt
 
 # setup salt
 echo 'Setting up salt...'
-& "$setup_salt" -SaltDir $saltDir -WorkstationDir $workstation
+& "$setup_salt" -SaltDir $salt -WorkstationDir $workstation
 
 # run salt highstate
 echo 'Provisioning...'
-& "$provision" -SaltDir $saltDir
+& "$provision" -SaltDir $salt
 
 echo 'done'
