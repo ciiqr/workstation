@@ -38,8 +38,9 @@ HibernateEnabled:
 
 # set power plan
 power_plan:
-  cmd.run: # TODO: find a way to make this work with salt:// paths
-    - name: C:\workstation\salt\states\windows\files\set-power-plan.ps1 -Plan "{{ windows.tweaks.power_plan }}"
+  cmd.script:
+    - source: salt://windows/files/set-power-plan.ps1
+    - name: set-power-plan.ps1 -Plan "{{ windows.tweaks.power_plan }}"
     - shell: powershell
     - stateful:
-      - test_name: C:\workstation\salt\states\windows\files\set-power-plan.ps1 -Plan "{{ windows.tweaks.power_plan }}" -Test
+      - test_name: set-power-plan.ps1 -Plan "{{ windows.tweaks.power_plan }}" -Test
