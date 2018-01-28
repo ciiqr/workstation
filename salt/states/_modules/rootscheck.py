@@ -21,7 +21,11 @@ def _exists(type, name):
 	# TODO: saltenv is None in pillars... is there anything reasonable to do? (maybe just look though all, since all should me merged anyways?)
 	# TODO: Would also be good to support multi-level sls_paths (with dots though, not slashes)
 	# TODO: support relative paths via tpldir
-	env = __opts__['saltenv'] or 'base'
+
+	env = __opts__.get('saltenv') or 'base'
+	if env not in __opts__[type]:
+		return False
+
 	for root in __opts__[type][env]:
 		base_path = '{0}/{1}'.format(root, name)
 		init_path = '{0}/init.sls'.format(base_path, name)
