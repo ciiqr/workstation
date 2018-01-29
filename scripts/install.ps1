@@ -1,5 +1,5 @@
 Param (
-    [Alias("SaltDir")] 
+    [Alias("SaltDir")]
     [string]$salt = $( Join-Path $env:SystemDrive 'salt' ),
     [switch]$link
 )
@@ -16,59 +16,8 @@ $scripts = Join-Path $workstation 'scripts'
 $setup_salt = Join-Path $scripts 'setup-salt.ps1'
 $provision = Join-Path $scripts 'provision.ps1'
 
-$saltCall = Join-Path $salt 'salt-call'
-
 # functions
-function CreateSymlink($target, $link) {
-    New-Item -Path $link -ItemType SymbolicLink -Value $target -Force > $null
-}
-
-function CustomTempDirectory {
-    # NOTE: I would rather generate a unique directory name and then delete it when done,
-    # but windows is stupid with the permissions of the newly downloaded file
-
-    $parent = [System.IO.Path]::GetTempPath()
-    $tmp = Join-Path $parent 'workstation'
-    if (![System.IO.Directory]::Exists($tmp)) {
-        [System.IO.Directory]::CreateDirectory($tmp) > $null
-    }
-    return $tmp
-}
-
-function TryRemoveDirectory($dir) {
-    if ([System.IO.Directory]::Exists($dir)) {
-        [System.IO.Directory]::Delete($dir, $true)
-    }
-}
-
-function WaitForFile($file) {
-    while (!(Test-Path $file)) {
-        echo "Waiting for $file to appear"
-        Start-Sleep 5
-    }
-    Start-Sleep 5
-}
-
-function WaitForSalt {
-    # source: https://gist.github.com/deuscapturus/8f18d28d1a1ccef6327c
-    $saltCallExe = "$saltCall.exe"
-    $saltCallBat = "$saltCall.bat"
-    # TODO: this OR something to check last change of salt dir instead of all this and wait at least 10 seconds for new changes or maybe we can even check for the program doing these things...
-    # '/salt/bin/Scripts/salt-call':
-    while (!(Test-Path $saltCallExe) -and !(Test-Path $saltCallBat)) {
-        echo 'Waiting for salt-call to appear'
-        Start-Sleep 5
-    }
-    Start-Sleep -s 15
-}
-
-function EnsureAdmin {
-    $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
-    if (!$currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-        echo 'must be run as an admin'
-        exit 0
-    }
-}
+. "$PSScriptRoot\include\common.ps1"
 
 # ensure we're running as an admin
 EnsureAdmin
@@ -122,7 +71,7 @@ WaitForFile($salt)
 icacls $salt /grant "Everyone:(OI)(CI)F"
 
 # wait for salt to be ready
-WaitForSalt
+WaitForSalt($salt)
 
 
 # setup salt
