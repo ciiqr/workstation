@@ -3,7 +3,7 @@
     {%- for name in varargs %}
       {%- if __salt__['rootscheck.pillar_exists'](name) -%}
         {{ name }}.sls
-      {%- endif -%}   
+      {%- endif -%}
     {% endfor %}
-  {%- endif -%}   
+  {%- endif -%}
 {%- endmacro %}

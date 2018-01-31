@@ -17,6 +17,7 @@ $setup_salt = Join-Path $scripts 'setup-salt.ps1'
 $provision = Join-Path $scripts 'provision.ps1'
 
 # functions
+# TODO: wait ugh, I'm a tool, apparently I shouldn't code so late, this just broke installing from install script http link
 . "$PSScriptRoot\include\common.ps1"
 
 # ensure we're running as an admin
@@ -64,6 +65,7 @@ Invoke-WebRequest $saltUrl -OutFile $saltFile -UseBasicParsing
 
 # install salt
 # TODO: probably don't need the minion name, or I could create minion_id myself
+# TODO: switch to salt bootstrap script?
 & $saltFile /S /minion-name=workstation /start-minion=0
 
 # set salt perms
@@ -80,6 +82,6 @@ echo 'Setting up salt...'
 
 # run salt highstate
 echo 'Provisioning...'
-& "$provision" -SaltDir $salt
+& "$provision"
 
 echo 'done'

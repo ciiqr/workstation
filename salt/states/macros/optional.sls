@@ -4,7 +4,7 @@
     {%- for name in varargs %}
       {%- if salt['rootscheck.state_exists'](name) %}
     - {{ name }}
-      {%- endif -%}   
+      {%- endif -%}
     {% endfor %}
-  {%- endif -%}   
+  {%- endif -%}
 {%- endmacro %}
